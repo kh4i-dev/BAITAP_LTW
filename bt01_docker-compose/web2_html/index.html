@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web 2 - Node-RED API Consumer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; min-height: 100vh; background: #f0f2f5; padding: 40px 16px; }
+        .box { background: #fff; max-width: 620px; margin: auto; padding: 32px; border-radius: 16px;
+               box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+        h2 { color: #1e293b; text-align: center; margin-bottom: 6px; }
+        .sub { text-align: center; color: #64748b; font-size: 14px; margin-bottom: 22px; }
+        button { width: 100%; padding: 14px; background: #2563eb; color: #fff; border: none; border-radius: 10px;
+                 font-size: 16px; cursor: pointer; transition: .2s; }
+        button:hover { background: #1d4ed8; }
+        table { width: 100%; border-collapse: collapse; margin-top: 22px; }
+        th, td { border-bottom: 1px solid #e2e8f0; padding: 12px 10px; text-align: left; font-size: 15px; }
+        th { background: #f8fafc; color: #334155; }
+        .success { color: #16a34a; font-weight: 600; margin-top: 16px; text-align: center; }
+    </style>
+</head>
+<body>
+<div class="box">
+    <h2>Dữ liệu từ Node-RED API</h2>
+    <p class="sub">GET <code>/api/tacke</code> — reverse proxy qua Nginx Proxy Manager</p>
+    <button onclick="loadData()">Gọi API Node-RED</button>
+    <div id="status" class="status"></div>
+    <table id="tbl" style="display:none;">
+        <thead>
+            <tr><th>STT</th><th>Họ Tên</th><th>Số tiền</th></tr>
+        </thead>
+        <tbody id="content"></tbody>
+    </table>
+</div>
+
+<script>
+    async function loadData() {
+        const status = document.getElementById('status');
+        const tbl = document.getElementById('tbl');
+        const tbody = document.getElementById('content');
+        status.innerHTML = "Đang gửi request...";
+
+        try {
+            // Path tương đối -> NPM forward /api sang nodered:1880, không dính CORS
+            const res = await fetch('/api/tacke');
+            const data = await res.json();
+
+            if (data.ok === 1) {
+                status.innerHTML = `<p class="success">Phản hồi: ${data.msg}</p>`;
+                tbody.innerHTML = '';
+                data.dssv.forEach((item, index) => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${item.name}</td>
+                            <td>${item.money.toLocaleString()} VNĐ</td>
+                        </tr>`;
+                });
+                tbl.style.display = 'table';
+            }
+        } catch (e) {
+            status.innerHTML = `<p style="color:red;text-align:center;">Lỗi gọi API: ${e.message}</p>`;
+        }
+    }
+</script>
+</body>
+</html>
