@@ -1,0 +1,11 @@
+# Bí mật — KHÔNG push
+.env
+**/.env
+!.env.example
+_secrets/
+**/_secrets/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
